@@ -5,7 +5,10 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import html2canvas from "html2canvas";
 import thaiBaht from "thai-baht-text";
-
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import "./assets/fonts/THSarabunNew-normal.js";
+import "./assets/fonts/THSarabunNew-bold.js";
 type FormData = {
   id: string;
   date: string;
@@ -83,8 +86,10 @@ function App() {
 
   const exportPDF = () => {
     const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.setFont("THSarabunNew", "normal");
     autoTable(doc, {
-      head: [["No.", "Date", "Name", "Project", "Amount"]],
+      head: [["เลขที่", "วันที่", "ชื่อ", "ประเภทบุญ", "จำนวน"]],
       body: submittedData.map((item) => [
         item.id,
         item.name,
@@ -92,8 +97,35 @@ function App() {
         item.project,
         item.amount,
       ]),
+      styles: {
+        font: "THSarabunNew",
+        fontSize: 14,
+      },
     });
     doc.save("form-data.pdf");
+  };
+
+  const exportExcel = () => {
+    if (submittedData.length === 0) return;
+
+    const worksheetData = submittedData.map((item, index) => ({
+      เลขที่: index + 1,
+      วันที่: item.date,
+      ชื่อผู้บริจาค: item.name,
+      ประเภทบุญ: item.project,
+      จำนวนเงิน: item.amount,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "ข้อมูล");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const data = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(data, "form-data.xlsx");
   };
 
   const saveCardAsImage = async () => {
@@ -105,6 +137,42 @@ function App() {
     link.href = image;
     link.download = "card.png";
     link.click();
+  };
+
+  const formatThaiDate = (dateStr: string) => {
+    const [dayStr, monthStr, yearStr] = dateStr.split("/");
+    const day = parseInt(dayStr, 10);
+    const month = parseInt(monthStr, 10);
+    let year = parseInt(yearStr, 10);
+
+    // ถ้าเป็นปี ค.ศ. ให้บวก 543
+    if (year < 100) {
+      const currentBEYear = new Date().getFullYear() + 543;
+      const currentShortYear = currentBEYear % 100;
+
+      // ถ้าปีที่ใส่มาน้อยกว่าปีปัจจุบัน (2 หลัก) => อยู่ในศตวรรษนี้
+      if (year >= currentShortYear) {
+        year += 2500; // เช่น 68 -> 2568
+      } else {
+        year += 2600; // เช่น 01 -> 2601
+      }
+    }
+    const thaiMonths = [
+      "มกราคม",
+      "กุมภาพันธ์",
+      "มีนาคม",
+      "เมษายน",
+      "พฤษภาคม",
+      "มิถุนายน",
+      "กรกฎาคม",
+      "สิงหาคม",
+      "กันยายน",
+      "ตุลาคม",
+      "พฤศจิกายน",
+      "ธันวาคม",
+    ];
+
+    return `${day} ${thaiMonths[month - 1]} พ.ศ. ${year}`;
   };
 
   const latestEntry = submittedData[submittedData.length - 1];
@@ -170,28 +238,88 @@ function App() {
         <>
           <button
             onClick={exportPDF}
-            className="bg-green-500 text-white px-4 py-2 rounded mb-6"
+            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
           >
             Export Table as PDF
+          </button>
+          <button
+            onClick={exportExcel}
+            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+          >
+            Export Table as Excel
           </button>
 
           <div
             ref={cardRef}
-            className="bg-white shadow p-4 rounded w-full max-w-md mb-4"
+            className="relative bg-white shadow px-8 py-6 rounded w-full max-w-2xl mx-auto text-center space-y-2 font-sarabun"
+            style={{
+              backgroundImage: 'url("/assets/image/glow.jpg")',
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
           >
-            <h2 className="text-lg font-semibold mb-2">อนุโมทนาบัตร</h2>
-            <p>ขออนุโมทนาบุญต่อ</p>
-            <p>{latestEntry?.name || "-"}</p>
+            {/* หัวเรื่อง */}
+            <div className="flex gap-4 h-10 inline-block">
+              <img
+                src="/assets/image/logo.png"
+                alt="Logo"
+                className="h-14 pt-1 inline-block"
+              />
+              <div className="text-xl pt-2 font-bold text-orange-700">
+                วัดป่าโค
+              </div>
+            </div>
+
+            <div className="text-xl font-semibold">อนุโมทนาบัตร</div>
+            <div className="absolute top-4 right-5 text-right">
+              <div className="text-sm text-gray-600">
+                เลขที่ {latestEntry?.id || "-"}
+              </div>
+              <div className="text-sm text-gray-600">
+                วันที่ {formatThaiDate(latestEntry?.date) || "-"}
+              </div>
+            </div>
+
+            {/* ผู้บริจาค */}
+            <p className="mt-4 pt-1">ขออนุโมทนาบุญต่อ</p>
+            <p className="p-3 text-xl font-semibold">
+              {latestEntry?.name || "-"}
+            </p>
             <p>
-              เป็นจำนวนเงิน
-              {latestEntry?.amount != null
-                ? `${new Intl.NumberFormat("th-TH", {
+              ผู้มีกุศลจิตศรัทธา เพื่อร่วมเป็นเจ้าภาพ{" "}
+              {latestEntry?.project || "-"}
+            </p>
+
+            {/* จำนวนเงิน */}
+            <p className="mt-2">
+              เป็นจำนวนเงิน{" "}
+              {latestEntry?.amount
+                ? `${Number(latestEntry.amount).toLocaleString("th-TH", {
                     minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }).format(Number(latestEntry.amount))} บาท`
+                  })} บาท`
                 : "-"}{" "}
               ({thaiBaht(latestEntry?.amount || "-")})
             </p>
+
+            {/* กรอบบทอวยพร */}
+            <div className="p-3 mt-4 text-sm text-gray-800 leading-relaxed">
+              <p>
+                ด้วยอานิสงส์ทานบารมีที่ได้บำเพ็ญในครั้งนี้
+                จงเป็นปัจจัยให้ท่านได้สำเร็จมรรคผล
+              </p>
+              <p>
+                มีดวงตาเห็นธรรมพร้อมทั้งวิชชาธรรมกาย ครบถ้วนเข้าสู่พระนิพพาน
+                เทอญฯ
+              </p>
+            </div>
+
+            {/* ลายเซ็น */}
+            <div className="flex flex-col items-end mt-6 text-sm text-gray-600">
+              <div>
+                <img src="/sign.png" alt="ลายเซ็น" className="h-10" />
+              </div>
+              <div>(ลายเซ็น) พระครูพิชาธรรม วิริยาวิไชย เจ้าอาวาส</div>
+            </div>
           </div>
 
           <button

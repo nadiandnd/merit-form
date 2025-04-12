@@ -1,0 +1,13 @@
+body {
+  font-family: "THSarabunNew", sans-serif;
+}
+input,
+button {
+  transition: all 0.2s ease-in-out;
+}
+
+input:focus {
+  outline: none;
+  border-color: #2563eb; /* blue-600 */
+  box-shadow: 0 0 0 1px #2563eb;
+}
