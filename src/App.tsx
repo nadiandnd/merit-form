@@ -9,6 +9,8 @@ import html2canvas from "html2canvas";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { FormData } from "./types/types";
+import "./assets/fonts/THSarabunNew-normal.js";
+import "./assets/fonts/THSarabunNew-bold.js";
 const App = () => {
   const [formData, setFormData] = useState<FormData>({
     id: "",
@@ -117,6 +119,7 @@ const App = () => {
   const exportPDF = () => {
     const doc = new jsPDF();
     doc.setFontSize(16);
+    doc.setFont("THSarabunNew", "normal");
     autoTable(doc, {
       head: [["เลขที่", "วันที่", "ชื่อ", "ประเภทบุญ", "จำนวน"]],
       body: submittedData.map((item) => [
@@ -126,7 +129,10 @@ const App = () => {
         item.project,
         item.amount,
       ]),
-      styles: { fontSize: 14 },
+      styles: {
+        font: "THSarabunNew",
+        fontSize: 14,
+      },
     });
     doc.save("form-data.pdf");
   };
