@@ -22,6 +22,8 @@ const App = () => {
   });
 
   const [submittedData, setSubmittedData] = useState<FormData[]>([]);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
   const cardRef = useRef<HTMLDivElement>(null);
 
   const donationTypes = [
@@ -68,43 +70,43 @@ const App = () => {
     }
   };
 
-  const validateForm = (data: FormData) => {
-    const errors: string[] = [];
+  const validateForm = (data: FormData): Record<string, string> => {
+    const errors: Record<string, string> = {};
 
-    if (!data.name || !data.project || !data.date || !data.amount || !data.id) {
-      errors.push("กรุณากรอกข้อมูลให้ครบทุกช่อง");
+    if (!data.name) errors.name = "กรุณากรอกชื่อ";
+    if (!data.project) errors.project = "กรุณาเลือกประเภทบุญ";
+    if (!data.date) {
+      errors.date = "กรุณากรอกวันที่";
+    } else {
+      const [dayStr, monthStr, yearStr] = data.date.split("/");
+      const month = parseInt(monthStr, 10);
+      const day = parseInt(dayStr, 10);
+
+      if (
+        month > 12 ||
+        day > 31 ||
+        dayStr.length !== 2 ||
+        monthStr.length !== 2 ||
+        yearStr.length !== 2
+      ) {
+        errors.date = "วันที่ไม่ถูกต้อง";
+      }
     }
 
-    const [dayStr, monthStr, yearStr] = data.date.split("/");
-    const month = parseInt(monthStr, 10);
-    const day = parseInt(dayStr, 10);
-
-    if (
-      month > 12 ||
-      day > 31 ||
-      dayStr.length !== 2 ||
-      monthStr.length !== 2 ||
-      yearStr.length !== 2
-    ) {
-      errors.push("วันที่ไม่ถูกต้อง");
-    }
+    if (!data.amount) errors.amount = "กรุณากรอกจำนวนเงิน";
+    if (!data.id) errors.id = "กรุณากรอกเลขที่";
 
     return errors;
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    // ตรวจสอบความถูกต้องของฟอร์ม
     const errors = validateForm(formData);
-
-    if (errors.length > 0) {
-      // ถ้ามีข้อผิดพลาด ให้แสดงข้อความเตือน
-      alert(errors.join("\n"));
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
       return;
     }
 
-    // ถ้าถูกต้อง ให้เพิ่มข้อมูลลงใน `submittedData`
     setSubmittedData([...submittedData, formData]);
     setFormData({
       id: "",
@@ -227,6 +229,7 @@ const App = () => {
         handleChange={handleChange}
         handleSubmit={handleSubmit}
         donationTypes={donationTypes}
+        error={formErrors}
       />
 
       {submittedData.length > 0 && (
