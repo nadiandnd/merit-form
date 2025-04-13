@@ -156,7 +156,9 @@ const App = () => {
 
   const saveCardAsImage = async () => {
     if (!cardRef.current) return;
-    const canvas = await html2canvas(cardRef.current);
+    const canvas = await html2canvas(cardRef.current, {
+      backgroundColor: "#ffffff",
+    });
     const image = canvas.toDataURL("image/png");
 
     const link = document.createElement("a");
