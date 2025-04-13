@@ -166,7 +166,7 @@ const App = () => {
     // Convert to Thai year
     if (year < 100) {
       const currentBEYear = new Date().getFullYear() + 543;
-      year = Math.floor(currentBEYear / 100) * 100 + (currentBEYear % 100);
+      year = Math.floor(currentBEYear / 100) * 100 + year;
     }
 
     const thaiMonths = [
