@@ -3,5 +3,6 @@ export type FormData = {
   date: string;
   name: string;
   project: string;
+  customProject: string;
   amount: string;
 };

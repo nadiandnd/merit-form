@@ -1,13 +1,6 @@
 import React, { ForwardedRef } from "react";
 import thaiBaht from "thai-baht-text";
-
-type FormData = {
-  id: string;
-  date: string;
-  name: string;
-  project: string;
-  amount: string;
-};
+import { FormData } from "./types/types";
 
 type CardProps = {
   latestEntry: FormData;
@@ -53,7 +46,10 @@ const CardComponent = React.forwardRef<HTMLDivElement, CardProps>(
         <p className="mt-4 pt-1">ขออนุโมทนาบุญต่อ</p>
         <p className="p-3 text-xl font-semibold">{latestEntry.name || "-"}</p>
         <p>
-          ผู้มีกุศลจิตศรัทธา เพื่อร่วมเป็นเจ้าภาพ {latestEntry.project || "-"}
+          ผู้มีกุศลจิตศรัทธา เพื่อร่วมเป็นเจ้าภาพ{" "}
+          {latestEntry.project === "other"
+            ? latestEntry.customProject || "-"
+            : latestEntry.project || "-"}
         </p>
 
         <p className="mt-2">

@@ -69,7 +69,18 @@ const FormComponent = ({
             {type}
           </option>
         ))}
+        <option value="other">อื่นๆ ระบุ</option>
       </select>
+      {formData.project === "other" && (
+        <input
+          type="text"
+          name="customProject"
+          placeholder="กรอกประเภทบุญของคุณ"
+          value={formData.customProject || ""}
+          onChange={handleChange}
+          className="mt-2 p-2 border-b w-full outline-none"
+        />
+      )}
     </div>
     <div className="flex justify-center">
       <button

@@ -15,6 +15,7 @@ const App = () => {
     date: "",
     name: "",
     project: "",
+    customProject: "",
     amount: "",
   });
 
@@ -103,7 +104,14 @@ const App = () => {
 
     // ถ้าถูกต้อง ให้เพิ่มข้อมูลลงใน `submittedData`
     setSubmittedData([...submittedData, formData]);
-    setFormData({ id: "", date: "", name: "", project: "", amount: "" });
+    setFormData({
+      id: "",
+      date: "",
+      name: "",
+      project: "",
+      customProject: "",
+      amount: "",
+    });
   };
 
   const exportPDF = () => {
