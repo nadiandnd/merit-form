@@ -74,26 +74,22 @@ const CardComponent = React.forwardRef<HTMLDivElement, CardProps>(
 
         <span className="flex justify-end">
           <div className="flex flex-col items-center text-sm text-gray-600 pr-6">
-            <div>
+            <div className="relative h-20 w-52">
               <img
                 src="/assets/image/signature.png"
                 alt="ลายเซ็น"
-                className="h-16 pt-1"
+                className="absolute top-0 left-0 h-20 w-auto"
               />
-            </div>
-            <div className="text-sm text-gray-600">
-              พระสมุห์ธีรพงษ์ ธีรวํโส (เจ้าอาวาส)
-            </div>
-          </div>
-          <div className="flex flex-col items-center text-sm text-gray-600">
-            <div>
               <img
                 src="/assets/image/remark.png"
                 alt="ตราประทับ"
-                className="h-16 pt-1"
+                className="absolute top-0 left-24 h-16 w-auto opacity-30"
               />
             </div>
-            <div className="text-sm text-gray-600">ตราประทับ</div>
+
+            <div className="text-sm text-gray-800">
+              พระสมุห์ธีรพงษ์ ธีรวํโส (เจ้าอาวาส)
+            </div>
           </div>
         </span>
       </div>

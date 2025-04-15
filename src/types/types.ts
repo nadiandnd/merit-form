@@ -5,4 +5,11 @@ export type FormData = {
   project: string;
   customProject: string;
   amount: string;
+  account: string;
+  depositHour: string;
+  depositMinute: string;
+  contactChannel: string;
+  contactId: string;
+  leaderName: string;
+  taxReport: string;
 };

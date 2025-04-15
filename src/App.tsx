@@ -19,6 +19,13 @@ const App = () => {
     project: "",
     customProject: "",
     amount: "",
+    account: "",
+    depositHour: "",
+    depositMinute: "",
+    contactChannel: "",
+    contactId: "",
+    leaderName: "",
+    taxReport: "",
   });
 
   const [submittedData, setSubmittedData] = useState<FormData[]>([]);
@@ -64,6 +71,12 @@ const App = () => {
       }
 
       setFormData((prev) => ({ ...prev, [name]: formatted }));
+    } else if (name === "account") {
+      setFormData((prev) => ({
+        ...prev,
+        account: value,
+        taxReport: value === "e donation" ? "No" : "Yes",
+      }));
     } else {
       // Other fields
       setFormData((prev) => ({ ...prev, [name]: value }));
@@ -95,6 +108,8 @@ const App = () => {
 
     if (!data.amount) errors.amount = "กรุณากรอกจำนวนเงิน";
     if (!data.id) errors.id = "กรุณากรอกเลขที่";
+    if (!data.account) errors.account = "กรุณากรอกเข้าบัญชีใด";
+    if (!data.depositHour) errors.depositHour = "กรุณากรอกเวลาเงินเข้าบัญชี";
 
     return errors;
   };
@@ -115,6 +130,13 @@ const App = () => {
       project: "",
       customProject: "",
       amount: "",
+      account: "",
+      depositHour: "",
+      depositMinute: "",
+      contactChannel: "",
+      contactId: "",
+      leaderName: "",
+      taxReport: "",
     });
   };
 
