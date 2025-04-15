@@ -194,6 +194,7 @@ const App = () => {
     if (!cardRef.current) return;
     const canvas = await html2canvas(cardRef.current, {
       backgroundColor: "#ffffff",
+      useCORS: true,
     });
     const image = canvas.toDataURL("image/png");
 
