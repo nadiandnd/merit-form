@@ -165,11 +165,17 @@ const App = () => {
     if (submittedData.length === 0) return;
 
     const worksheetData = submittedData.map((item, index) => ({
-      เลขที่: index + 1,
+      เลขที่: item.id,
       วันที่: item.date,
       ชื่อผู้บริจาค: item.name,
-      ประเภทบุญ: item.project,
+      ประเภทบุญ: item.project === "other" ? item.customProject : item.project,
       จำนวนเงิน: item.amount,
+      บัญชี: item.account,
+      เวลาเข้า: `${item.depositHour}:${item.depositMinute}`,
+      ช่องทางติดต่อ: item.contactChannel,
+      "ID เจ้าภาพ": item.contactId,
+      ผู้นำบุญ: item.leaderName,
+      รายงานภาษี: item.taxReport,
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(worksheetData);
