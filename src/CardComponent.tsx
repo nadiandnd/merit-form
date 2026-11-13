@@ -23,7 +23,7 @@ const CardComponent = React.forwardRef<HTMLDivElement, CardProps>(
         >
           <div
             ref={ref}
-            className="donation-card relative bg-white shadow px-8 py-6 rounded text-center space-y-2 font-sarabun"
+            className="donation-card relative bg-white shadow px-8 py-6 rounded text-center space-y-1 font-sarabun"
             style={{
               backgroundImage: 'url("/assets/image/glow.jpg")',
               backgroundSize: "cover",
@@ -61,7 +61,8 @@ const CardComponent = React.forwardRef<HTMLDivElement, CardProps>(
               {latestEntry.name || "-"}
             </p>
             <p className="p-3 text-lg">
-              ผู้มีกุศลจิตศรัทธา เพื่อร่วมเป็นเจ้าภาพ{" "}
+              ผู้มีกุศลจิตศรัทธา เพื่อร่วมเป็นเจ้าภาพ
+              <br />
               {latestEntry.project === "other"
                 ? latestEntry.customProject || "-"
                 : latestEntry.project || "-"}
