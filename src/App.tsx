@@ -1,9 +1,10 @@
 import "./App.css";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import FormComponent from "./FormComponent";
 import CardComponent from "./CardComponent";
 import MainLayout from "./MainLayout";
 import html2canvas from "html2canvas";
+import { saveAs } from "file-saver";
 import { FormData } from "./types/types";
 import "./assets/fonts/THSarabunNew-normal.js";
 import "./assets/fonts/THSarabunNew-bold.js";
@@ -65,6 +66,13 @@ const App = () => {
   const [submittedData, setSubmittedData] = useState<FormData[]>([]);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [dateDirty, setDateDirty] = useState(false);
+  const [downloadError, setDownloadError] = useState("");
+  const [imagePreviewUrl, setImagePreviewUrl] = useState("");
+
+  useEffect(() => {
+    if (!imagePreviewUrl) return;
+    return () => URL.revokeObjectURL(imagePreviewUrl);
+  }, [imagePreviewUrl]);
 
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -204,18 +212,65 @@ const App = () => {
   //   saveAs(data, "form-data.xlsx");
   // };
 
-  const saveCardAsImage = async () => {
-    if (!cardRef.current) return;
-    const canvas = await html2canvas(cardRef.current, {
+  const createCardImage = async () => {
+    const card = cardRef.current;
+    if (!card) return null;
+
+    const canvas = await html2canvas(card, {
       backgroundColor: "#ffffff",
       useCORS: true,
     });
-    const image = canvas.toDataURL("image/png");
+    return new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error("Unable to create PNG image"));
+        }
+      }, "image/png");
+    });
+  };
 
-    const link = document.createElement("a");
-    link.href = image;
-    link.download = "card.png";
-    link.click();
+  const saveCardAsImage = async () => {
+    setDownloadError("");
+    try {
+      const image = await createCardImage();
+      if (!image) return;
+
+      if (/Line\/[\d.]+/i.test(navigator.userAgent)) {
+        setImagePreviewUrl(URL.createObjectURL(image));
+      } else {
+        saveAs(image, "card.png");
+      }
+    } catch (error) {
+      console.error("Failed to save donation card image:", error);
+      setDownloadError("บันทึกรูปภาพไม่สำเร็จ กรุณาลองอีกครั้ง");
+    }
+  };
+
+  const openCardImageInNewTab = async () => {
+    const imageWindow = window.open("about:blank", "_blank");
+    if (!imageWindow) {
+      setDownloadError("เปิดแท็บใหม่ไม่สำเร็จ กรุณาอนุญาตป๊อปอัปในเบราว์เซอร์");
+      return;
+    }
+
+    setDownloadError("");
+    try {
+      const image = await createCardImage();
+      if (!image) {
+        imageWindow.close();
+        return;
+      }
+
+      const imageUrl = URL.createObjectURL(image);
+      imageWindow.location.href = imageUrl;
+      window.setTimeout(() => URL.revokeObjectURL(imageUrl), 40_000);
+    } catch (error) {
+      imageWindow.close();
+      console.error("Failed to open donation card image:", error);
+      setDownloadError("เปิดรูปภาพไม่สำเร็จ กรุณาลองอีกครั้ง");
+    }
   };
 
   const formatThaiDate = (dateStr: string) => {
@@ -292,6 +347,9 @@ const App = () => {
             latestEntry={latestEntry}
             formatThaiDate={formatThaiDate}
             saveCardAsImage={saveCardAsImage}
+            openCardImageInNewTab={openCardImageInNewTab}
+            downloadError={downloadError}
+            imagePreviewUrl={imagePreviewUrl}
             ref={cardRef}
           />
         </>

@@ -6,11 +6,21 @@ type CardProps = {
   latestEntry: FormData;
   formatThaiDate: (dateStr: string) => string;
   saveCardAsImage: () => void;
+  openCardImageInNewTab: () => void;
+  downloadError: string;
+  imagePreviewUrl: string;
 };
 
 const CardComponent = React.forwardRef<HTMLDivElement, CardProps>(
   (
-    { latestEntry, formatThaiDate, saveCardAsImage }: CardProps,
+    {
+      latestEntry,
+      formatThaiDate,
+      saveCardAsImage,
+      openCardImageInNewTab,
+      downloadError,
+      imagePreviewUrl,
+    }: CardProps,
     ref: ForwardedRef<HTMLDivElement>,
   ) => {
     return (
@@ -23,7 +33,17 @@ const CardComponent = React.forwardRef<HTMLDivElement, CardProps>(
         >
           <div
             ref={ref}
-            className="donation-card relative bg-white shadow px-8 py-6 rounded text-center space-y-1 font-sarabun"
+            className="donation-card relative cursor-zoom-in rounded bg-white px-8 py-6 text-center shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-green-700 space-y-1 font-sarabun"
+            role="button"
+            tabIndex={0}
+            aria-label="เปิดภาพบัตรอนุโมทนาในแท็บใหม่"
+            onClick={openCardImageInNewTab}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                openCardImageInNewTab();
+              }
+            }}
             style={{
               backgroundImage: 'url("/assets/image/glow.jpg")',
               backgroundSize: "cover",
@@ -56,11 +76,11 @@ const CardComponent = React.forwardRef<HTMLDivElement, CardProps>(
               </div>
             </div>
 
-            <p className="mt-4 pt-1">ขออนุโมทนาบุญต่อ</p>
-            <p className="p-3 text-xl font-semibold">
+            <p className="mt-4 pt-2">ขออนุโมทนาบุญต่อ</p>
+            <p className="p-2 text-xl font-semibold">
               {latestEntry.name || "-"}
             </p>
-            <p className="p-3 text-lg">
+            <p className="pt-1 pb-2">
               ผู้มีกุศลจิตศรัทธา เพื่อร่วมเป็นเจ้าภาพ
               <br />
               {latestEntry.project === "other"
@@ -68,7 +88,7 @@ const CardComponent = React.forwardRef<HTMLDivElement, CardProps>(
                 : latestEntry.project || "-"}
             </p>
 
-            <p className="mt-1">
+            <p>
               เป็นจำนวนเงิน{" "}
               {latestEntry.amount
                 ? `${Number(latestEntry.amount).toLocaleString("th-TH", {
@@ -112,11 +132,24 @@ const CardComponent = React.forwardRef<HTMLDivElement, CardProps>(
           </div>
         </div>
         <p className="donation-card-hint">เลื่อนแนวนอนเพื่อดูบัตร</p>
+
         <div className="flex justify-center mt-4">
           <button onClick={saveCardAsImage} className="button-primary">
             บันทึกเป็นรูปภาพ
           </button>
         </div>
+        {imagePreviewUrl && (
+          <img
+            src={imagePreviewUrl}
+            alt="รูปภาพบัตรอนุโมทนา แตะค้างเพื่อบันทึก"
+            className="mx-auto mt-4 h-auto max-w-full rounded shadow"
+          />
+        )}
+        {downloadError && (
+          <p className="field-error" role="alert">
+            {downloadError}
+          </p>
+        )}
       </>
     );
   },
