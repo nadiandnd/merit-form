@@ -5,11 +5,11 @@ type MainLayoutProps = {
 };
 const MainLayout = ({ children }: MainLayoutProps) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-yellow-100 p-6">
-      <header className="text-3xl font-extrabold text-center text-yellow-800 drop-shadow-md mt-4 mb-8 relative leading-relaxed">
-        แบบฟอร์มข้อมูลการรับบริจาค
-        <br />
-        วัดป่าโค
+    <div className="app-shell">
+      <header className="page-header">
+        <img className="brand-mark" src="/assets/image/logo.png" alt="วัดป่าโค" />
+        <h1 className="page-title">แบบฟอร์มข้อมูลการรับบริจาค</h1>
+        <p className="page-subtitle">วัดป่าโค · บันทึกข้อมูลเพื่อจัดทำอนุโมทนาบัตร</p>
       </header>
       <main>{children}</main>
     </div>

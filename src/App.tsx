@@ -3,14 +3,55 @@ import { useState, useRef } from "react";
 import FormComponent from "./FormComponent";
 import CardComponent from "./CardComponent";
 import MainLayout from "./MainLayout";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import html2canvas from "html2canvas";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
 import { FormData } from "./types/types";
 import "./assets/fonts/THSarabunNew-normal.js";
 import "./assets/fonts/THSarabunNew-bold.js";
+
+const validateDate = (date: string | undefined): string | undefined => {
+  if (!date) return "กรุณากรอกวันที่";
+
+  const dateParts = /^(\d{2})\/(\d{2})\/(\d{2})$/.exec(date);
+  if (!dateParts) {
+    return "กรุณากรอกวันที่ให้ครบในรูปแบบ วว/ดด/ปป เช่น 01/01/69";
+  }
+
+  const [, dayText, monthText, yearText] = dateParts;
+  const day = Number(dayText);
+  const month = Number(monthText);
+  const buddhistYear =
+    Math.floor((new Date().getFullYear() + 543) / 100) * 100 +
+    Number(yearText);
+
+  if (month < 1 || month > 12) {
+    return "เดือนไม่ถูกต้อง กรุณาระบุเดือนตั้งแต่ 01 ถึง 12";
+  }
+
+  if (day < 1) {
+    return "วันไม่ถูกต้อง กรุณาระบุวันที่ตั้งแต่ 01 เป็นต้นไป";
+  }
+
+  const gregorianYear = buddhistYear - 543;
+  const daysInMonth = new Date(gregorianYear, month, 0).getDate();
+  if (day > daysInMonth) {
+    return `วันที่ไม่ถูกต้อง เดือนนี้มีได้ไม่เกิน ${daysInMonth} วัน`;
+  }
+
+  return undefined;
+};
+
+const formatDateInput = (digits: string): string => {
+  const day = digits.slice(0, 2);
+  const month = digits.slice(2, 4);
+  const year = digits.slice(4, 6);
+
+  if (digits.length < 2) return day;
+  if (digits.length === 2) return `${day}/`;
+  if (digits.length < 4) return `${day}/${month}`;
+  if (digits.length === 4) return `${day}/${month}/`;
+  return `${day}/${month}/${year}`;
+};
+
 const App = () => {
   const [formData, setFormData] = useState<FormData>({
     id: "",
@@ -19,17 +60,11 @@ const App = () => {
     project: "",
     customProject: "",
     amount: "",
-    account: "",
-    depositHour: "",
-    depositMinute: "",
-    contactChannel: "",
-    contactId: "",
-    leaderName: "",
-    taxReport: "",
   });
 
   const [submittedData, setSubmittedData] = useState<FormData[]>([]);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [dateDirty, setDateDirty] = useState(false);
 
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -51,36 +86,41 @@ const App = () => {
   ];
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
 
     if (name === "date") {
       const rawDigits = value.replace(/\D/g, "");
 
-      // Limit the digits to 6
       if (rawDigits.length > 6) return;
 
-      // Format the date as dd/mm/yyyy
-      let formatted = rawDigits;
-      if (formatted.length > 2) {
-        formatted = formatted.slice(0, 2) + "/" + formatted.slice(2);
-      }
-      if (formatted.length > 5) {
-        formatted = formatted.slice(0, 5) + "/" + formatted.slice(5);
-      }
-
-      setFormData((prev) => ({ ...prev, [name]: formatted }));
-    } else if (name === "account") {
       setFormData((prev) => ({
         ...prev,
-        account: value,
-        taxReport: value === "e donation" ? "No" : "Yes",
+        [name]: formatDateInput(rawDigits),
       }));
+      setDateDirty(true);
     } else {
       // Other fields
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
+  };
+
+  const handleDateKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const input = e.currentTarget;
+    const caretAtEnd =
+      input.selectionStart === input.value.length &&
+      input.selectionEnd === input.value.length;
+    if (e.key !== "Backspace" || !caretAtEnd || !input.value.endsWith("/")) {
+      return;
+    }
+
+    e.preventDefault();
+    const remainingDigits = input.value.replace(/\D/g, "").slice(0, -1);
+    setFormData((prev) => ({
+      ...prev,
+      date: formatDateInput(remainingDigits),
+    }));
   };
 
   const validateForm = (data: FormData): Record<string, string> => {
@@ -88,29 +128,11 @@ const App = () => {
 
     if (!data.name) errors.name = "กรุณากรอกชื่อ";
     if (!data.project) errors.project = "กรุณาเลือกประเภทบุญ";
-    if (!data.date) {
-      errors.date = "กรุณากรอกวันที่";
-    } else {
-      const [dayStr, monthStr, yearStr] = data.date.split("/");
-      const month = parseInt(monthStr, 10);
-      const day = parseInt(dayStr, 10);
-
-      if (
-        month > 12 ||
-        day > 31 ||
-        dayStr.length !== 2 ||
-        monthStr.length !== 2 ||
-        yearStr.length !== 2
-      ) {
-        errors.date = "วันที่ไม่ถูกต้อง";
-      }
-    }
+    const dateError = validateDate(data.date);
+    if (dateError) errors.date = dateError;
 
     if (!data.amount) errors.amount = "กรุณากรอกจำนวนเงิน";
     if (!data.id) errors.id = "กรุณากรอกเลขที่";
-    if (!data.account) errors.account = "กรุณากรอกเข้าบัญชีใด";
-    if (!data.depositHour) errors.depositHour = "กรุณากรอกเวลาเงินเข้าบัญชี";
-
     return errors;
   };
 
@@ -119,10 +141,13 @@ const App = () => {
     const errors = validateForm(formData);
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
+      setDateDirty(true);
       return;
     }
 
     setSubmittedData([...submittedData, formData]);
+    setFormErrors({});
+    setDateDirty(false);
     setFormData({
       id: "",
       date: "",
@@ -130,65 +155,52 @@ const App = () => {
       project: "",
       customProject: "",
       amount: "",
-      account: "",
-      depositHour: "",
-      depositMinute: "",
-      contactChannel: "",
-      contactId: "",
-      leaderName: "",
-      taxReport: "",
     });
   };
 
-  const exportPDF = () => {
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.setFont("THSarabunNew", "normal");
-    autoTable(doc, {
-      head: [["เลขที่", "วันที่", "ชื่อ", "ประเภทบุญ", "จำนวน"]],
-      body: submittedData.map((item) => [
-        item.id,
-        item.name,
-        item.date,
-        item.project,
-        item.amount,
-      ]),
-      styles: {
-        font: "THSarabunNew",
-        fontSize: 14,
-      },
-    });
-    doc.save("form-data.pdf");
-  };
+  // const exportPDF = () => {
+  //   const doc = new jsPDF();
+  //   doc.setFontSize(16);
+  //   doc.setFont("THSarabunNew", "normal");
+  //   autoTable(doc, {
+  //     head: [["เลขที่", "วันที่", "ชื่อ", "ประเภทบุญ", "จำนวน"]],
+  //     body: submittedData.map((item) => [
+  //       item.id,
+  //       item.name,
+  //       item.date,
+  //       item.project,
+  //       item.amount,
+  //     ]),
+  //     styles: {
+  //       font: "THSarabunNew",
+  //       fontSize: 14,
+  //     },
+  //   });
+  //   doc.save("form-data.pdf");
+  // };
 
-  const exportExcel = () => {
-    if (submittedData.length === 0) return;
+  // const exportExcel = () => {
+  //   if (submittedData.length === 0) return;
 
-    const worksheetData = submittedData.map((item, index) => ({
-      เลขที่: item.id,
-      วันที่: item.date,
-      ชื่อผู้บริจาค: item.name,
-      ประเภทบุญ: item.project === "other" ? item.customProject : item.project,
-      จำนวนเงิน: item.amount,
-      บัญชี: item.account,
-      เวลาเข้า: `${item.depositHour}:${item.depositMinute}`,
-      ช่องทางติดต่อ: item.contactChannel,
-      "ID เจ้าภาพ": item.contactId,
-      ผู้นำบุญ: item.leaderName,
-      รายงานภาษี: item.taxReport,
-    }));
+  //   const worksheetData = submittedData.map((item, index) => ({
+  //     เลขที่: item.id,
+  //     วันที่: item.date,
+  //     ชื่อผู้บริจาค: item.name,
+  //     ประเภทบุญ: item.project === "other" ? item.customProject : item.project,
+  //     จำนวนเงิน: item.amount,
+  //   }));
 
-    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "ข้อมูล");
+  //   const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "ข้อมูล");
 
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-    const data = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(data, "form-data.xlsx");
-  };
+  //   const excelBuffer = XLSX.write(workbook, {
+  //     bookType: "xlsx",
+  //     type: "array",
+  //   });
+  //   const data = new Blob([excelBuffer], { type: "application/octet-stream" });
+  //   saveAs(data, "form-data.xlsx");
+  // };
 
   const saveCardAsImage = async () => {
     if (!cardRef.current) return;
@@ -235,10 +247,20 @@ const App = () => {
   };
 
   const latestEntry = submittedData[submittedData.length - 1];
+  const visibleErrors = { ...formErrors };
+  if (dateDirty) {
+    const dateError = validateDate(formData.date);
+    if (dateError) {
+      visibleErrors.date = dateError;
+    } else {
+      delete visibleErrors.date;
+    }
+  }
 
   return (
     <MainLayout>
-      <div className="absolute top-12 right-4 flex gap-3 z-50">
+      {/* TODO: Add this feature back in the future after backecd implementation is done */}
+      {/* <div className="absolute top-12 right-4 flex gap-3 z-50">
         <button
           onClick={exportPDF}
           className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded"
@@ -251,14 +273,15 @@ const App = () => {
         >
           Export Table as Excel
         </button>
-      </div>
+      </div> */}
 
       <FormComponent
         formData={formData}
         handleChange={handleChange}
+        handleDateKeyDown={handleDateKeyDown}
         handleSubmit={handleSubmit}
         donationTypes={donationTypes}
-        error={formErrors}
+        error={visibleErrors}
       />
 
       {submittedData.length > 0 && (

@@ -1,15 +1,8 @@
 export type FormData = {
-  id: string;
-  date: string;
-  name: string;
-  project: string;
-  customProject: string;
-  amount: string;
-  account: string;
-  depositHour: string;
-  depositMinute: string;
-  contactChannel: string;
-  contactId: string;
-  leaderName: string;
-  taxReport: string;
+  id: string; // เลขที่
+  date: string; // วันที่
+  name: string; // ชื่อ-นามสกุล
+  project: string; // ประเภทบุญ
+  customProject: string; // ประเภทบุญอื่นๆ
+  amount: string; // จำนวนเงิน
 };

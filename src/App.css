@@ -1,17 +1,253 @@
-body {
-  font-family: "THSarabunNew", sans-serif;
-}
-input,
-button {
-  transition: all 0.2s ease-in-out;
+.app-shell {
+  min-height: 100vh;
+  padding: 44px 24px 64px;
+  background:
+    radial-gradient(
+      ellipse at 8% 5%,
+      rgb(221 236 225 / 65%),
+      transparent 34rem
+    ),
+    radial-gradient(
+      ellipse at 95% 85%,
+      rgb(245 231 199 / 48%),
+      transparent 32rem
+    ),
+    #f7f8f4;
 }
 
-input:focus {
-  outline: none;
-  border-color: #2563eb; /* blue-600 */
-  box-shadow: 0 0 0 1px #2563eb;
+.page-header {
+  margin: 0 auto 30px;
+  text-align: center;
+}
+
+.brand-mark {
+  width: 58px;
+  height: 58px;
+  margin-bottom: 12px;
+  object-fit: contain;
+  border: 1px solid rgb(37 83 68 / 12%);
+  border-radius: 18px;
+  background: #fff;
+  padding: 8px;
+  box-shadow: 0 8px 22px rgb(34 61 48 / 8%);
+}
+
+.page-title {
+  margin: 0;
+  color: #233f35;
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.page-subtitle {
+  margin: 7px 0 0;
+  color: #718078;
+  font-size: 1.125rem;
+}
+
+.form-card {
+  width: min(100%, 760px);
+  margin: 0 auto;
+  border: 1px solid rgb(35 63 53 / 8%);
+  border-radius: 24px;
+  background: rgb(255 255 255 / 94%);
+  padding: clamp(22px, 5vw, 38px);
+  box-shadow:
+    0 22px 60px rgb(33 54 45 / 8%),
+    0 2px 8px rgb(33 54 45 / 3%);
+}
+
+.form-heading {
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.form-heading h2 {
+  margin: 0;
+  color: #263d34;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.form-heading p {
+  margin: 5px 0 0;
+  color: #7b8881;
+  font-size: 1rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 18px;
 }
 
 .form-control {
-  padding: 0 30%;
+  min-width: 0;
+}
+
+.form-control--wide {
+  grid-column: 1 / -1;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 7px;
+  color: #344a40;
+  font-size: 1.0625rem;
+  font-weight: 700;
+}
+
+.required-mark {
+  margin-left: 3px;
+  color: #bd5b47;
+}
+
+.field-input,
+.field-select {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #dce4de;
+  border-radius: 12px;
+  outline: none;
+  background-color: #fbfcfa;
+  padding: 9px 14px;
+  color: #263d34;
+  font-size: 1.0625rem;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.field-input::placeholder {
+  color: #a0aaa4;
+}
+
+.field-input:hover,
+.field-select:hover {
+  border-color: #b7c8bd;
+}
+
+.field-input:focus,
+.field-select:focus {
+  border-color: #427b63;
+  background-color: #fff;
+  box-shadow: 0 0 0 4px rgb(66 123 99 / 13%);
+}
+
+.field-input[aria-invalid="true"],
+.field-select[aria-invalid="true"] {
+  border-color: #c65e4d;
+}
+
+.field-input[aria-invalid="true"]:focus,
+.field-select[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 4px rgb(198 94 77 / 12%);
+}
+
+.field-hint {
+  margin: 6px 0 0;
+  color: #87928c;
+  font-size: 0.9375rem;
+}
+
+.field-error {
+  margin: 5px 0 0;
+  color: #b54738;
+  font-size: 0.9375rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 26px;
+}
+
+.button-primary {
+  min-height: 48px;
+  border: 0;
+  border-radius: 12px;
+  background: #285d48;
+  padding: 9px 26px;
+  color: #fff;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  box-shadow: 0 6px 14px rgb(40 93 72 / 19%);
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.button-primary:hover {
+  transform: translateY(-1px);
+  background: #214e3c;
+  box-shadow: 0 9px 18px rgb(40 93 72 / 24%);
+}
+
+.button-primary:focus-visible {
+  outline: 3px solid rgb(66 123 99 / 35%);
+  outline-offset: 3px;
+}
+
+.button-primary:active {
+  transform: translateY(0);
+}
+
+.donation-card-frame {
+  width: min(100%, 672px);
+  margin-inline: auto;
+  margin-top: 32px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.donation-card {
+  width: 672px;
+}
+
+.donation-card-hint {
+  display: none;
+}
+
+@media (max-width: 560px) {
+  .app-shell {
+    padding: 30px 16px 44px;
+  }
+
+  .donation-card-hint {
+    display: block;
+    margin: 8px 0 0;
+    color: #718078;
+    text-align: center;
+  }
+
+  .page-header {
+    margin-bottom: 22px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 17px;
+  }
+
+  .form-control--wide {
+    grid-column: auto;
+  }
+
+  .form-actions .button-primary {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -7,6 +7,7 @@ type FormProps = {
   handleChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => void;
+  handleDateKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   donationTypes: string[];
   error: Record<string, string>;
@@ -15,235 +16,160 @@ type FormProps = {
 const FormComponent = ({
   formData,
   handleChange,
+  handleDateKeyDown,
   handleSubmit,
   donationTypes,
   error,
 }: FormProps) => (
-  <form onSubmit={handleSubmit} className="mb-6 space-y-4">
-    <div className="form-control">
-      <label className="block">
-        เลขที่:<span className="text-red-500">*</span>
-      </label>
-
-      <input
-        name="id"
-        value={formData.id}
-        onChange={handleChange}
-        className={`p-2 border rounded w-full ${
-          error.id ? "border-red-500" : ""
-        }`}
-      />
-      {error.id && <p className="text-red-500 text-sm">{error.id}</p>}
+  <form onSubmit={handleSubmit} className="form-card">
+    <div className="form-heading">
+      <h2>กรอกข้อมูลการบริจาค</h2>
+      <p>กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน</p>
     </div>
-    <div className="form-control">
-      <label className="block">
-        วันที่:<span className="text-red-500">*</span>
-      </label>
-
-      <input
-        name="date"
-        value={formData.date}
-        onChange={handleChange}
-        className={`p-2 border rounded w-full ${
-          error.date ? "border-red-500" : ""
-        }`}
-      />
-      {error.date && <p className="text-red-500 text-sm">{error.date}</p>}
-    </div>
-    <div className="form-control">
-      <label className="block">
-        ชื่อ-นามสกุล:<span className="text-red-500">*</span>
-      </label>
-
-      <input
-        name="name"
-        value={formData.name}
-        onChange={handleChange}
-        className={`p-2 border rounded w-full ${
-          error.name ? "border-red-500" : ""
-        }`}
-      />
-      {error.name && <p className="text-red-500 text-sm">{error.name}</p>}
-    </div>
-    <div className="form-control">
-      <label className="block">
-        จำนวนเงิน:<span className="text-red-500">*</span>
-      </label>
-
-      <input
-        type="number"
-        name="amount"
-        value={formData.amount}
-        onChange={handleChange}
-        className={`p-2 border rounded w-full ${
-          error.amount ? "border-red-500" : ""
-        }`}
-      />
-      {error.amount && <p className="text-red-500 text-sm">{error.amount}</p>}
-    </div>
-    <div className="form-control">
-      <label className="block">
-        ประเภทบุญ:<span className="text-red-500">*</span>
-      </label>
-
-      <select
-        name="project"
-        value={formData.project}
-        onChange={handleChange}
-        className={`p-2 border rounded w-full ${
-          error.project ? "border-red-500" : ""
-        }`}
-      >
-        <option value="">-- กรุณาเลือกประเภทบุญ --</option>
-        {donationTypes.map((type, index) => (
-          <option key={index} value={type}>
-            {type}
-          </option>
-        ))}
-        <option value="other">อื่นๆ ระบุ</option>
-      </select>
-      {error.project && <p className="text-red-500 text-sm">{error.project}</p>}
-      {formData.project === "other" && (
-        <input
-          type="text"
-          name="customProject"
-          placeholder="กรอกประเภทบุญของคุณ"
-          value={formData.customProject || ""}
-          onChange={handleChange}
-          className="mt-2 p-2 border-b w-full outline-none"
-        />
-      )}
-    </div>
-    {/* เข้าบัญชีใด */}
-    <div className="form-control">
-      <label className="block">
-        เข้าบัญชีใด:<span className="text-red-500">*</span>
-      </label>
-      <select
-        name="account"
-        value={formData.account}
-        onChange={handleChange}
-        className={`p-2 border rounded w-full ${
-          error.account ? "border-red-500" : ""
-        }`}
-      >
-        <option value="">-- เลือกบัญชี --</option>
-        <option value="e donation">e donation</option>
-        <option value="Cash">Cash</option>
-        <option value="KTB Bank">KTB Bank</option>
-      </select>
-      {error.account && <p className="text-red-500 text-sm">{error.account}</p>}
-    </div>
-
-    {/* เวลาเงินเข้าบัญชี */}
-    <div className="form-control">
-      <label className="block">
-        เวลาเงินเข้าบัญชี (ชั่วโมง:นาที):<span className="text-red-500">*</span>
-      </label>
-      <div className="flex space-x-2">
-        <input
-          type="number"
-          name="depositHour"
-          value={formData.depositHour}
-          onChange={handleChange}
-          className={`p-2 border rounded w-[80px] text-center" ${
-            error.depositHour ? "border-red-500" : ""
-          }`}
-          placeholder="ชั่วโมง"
-          min={0}
-          max={23}
-        />
-        <span className="self-center">:</span>
-        <input
-          type="number"
-          name="depositMinute"
-          value={formData.depositMinute}
-          onChange={handleChange}
-          className={`p-2 border rounded w-[80px] text-center" ${
-            error.depositHour ? "border-red-500" : ""
-          }`}
-          placeholder="นาที"
-          min={0}
-          max={59}
-        />
-      </div>
-      {error.depositHour && (
-        <p className="text-red-500 text-sm">{error.date}</p>
-      )}
-    </div>
-
-    {/* ช่องทางติดต่อเจ้าภาพ */}
-    <div className="form-control">
-      <label className="block">ช่องทางติดต่อเจ้าภาพ:</label>
-      <input
-        name="contactChannel"
-        value={formData.contactChannel}
-        onChange={handleChange}
-        className="p-2 border rounded w-full"
-      />
-    </div>
-
-    {/* ID เจ้าภาพ */}
-    <div className="form-control">
-      <label className="block">ID เจ้าภาพ:</label>
-      <input
-        name="contactId"
-        value={formData.contactId}
-        onChange={handleChange}
-        className="p-2 border rounded w-full"
-      />
-    </div>
-
-    {/* ผู้นำบุญ */}
-    <div className="form-control">
-      <label className="block">ผู้นำบุญ:</label>
-      <input
-        name="leaderName"
-        value={formData.leaderName}
-        onChange={handleChange}
-        className="p-2 border rounded w-full"
-      />
-    </div>
-
-    {/* ✅ ช่อง radio: แสดงในรายงานภาษี */}
-    <div className="form-control">
-      <label className="block">
-        แสดงในรายงานภาษี<span className="text-red-500">*</span>{" "}
-        <span className="text-sm text-gray-500">(ถ้าเป็น e donation = No)</span>
-      </label>
-      <div className="flex items-center space-x-4 mt-1">
-        <label className="inline-flex items-center">
-          <input
-            type="radio"
-            name="taxReport"
-            value="Yes"
-            checked={formData.taxReport === "Yes"}
-            onChange={handleChange}
-          />
-          <span className="ml-2">Yes</span>
+    <div className="form-grid">
+      <div className="form-control">
+        <label className="field-label" htmlFor="donation-id">
+          เลขที่<span className="required-mark" aria-hidden="true">*</span>
         </label>
-        <label className="inline-flex items-center">
-          <input
-            type="radio"
-            name="taxReport"
-            value="No"
-            checked={formData.taxReport === "No"}
-            onChange={handleChange}
-          />
-          <span className="ml-2">No</span>
-        </label>
+        <input
+          id="donation-id"
+          name="id"
+          value={formData.id}
+          onChange={handleChange}
+          placeholder="เช่น 001"
+          className="field-input"
+          aria-invalid={Boolean(error.id)}
+          aria-describedby={error.id ? "donation-id-error" : undefined}
+        />
+        {error.id && (
+          <p className="field-error" id="donation-id-error" role="alert">
+            {error.id}
+          </p>
+        )}
       </div>
-      {error.taxReport && (
-        <p className="text-red-500 text-sm">{error.taxReport}</p>
-      )}
+      <div className="form-control">
+        <label className="field-label" htmlFor="donation-date">
+          วันที่<span className="required-mark" aria-hidden="true">*</span>
+        </label>
+        <input
+          id="donation-date"
+          name="date"
+          value={formData.date}
+          onChange={handleChange}
+          onKeyDown={handleDateKeyDown}
+          placeholder="วว/ดด/ปป"
+          inputMode="numeric"
+          className="field-input"
+          aria-invalid={Boolean(error.date)}
+          aria-describedby={
+            error.date ? "donation-date-hint donation-date-error" : "donation-date-hint"
+          }
+        />
+        <p className="field-hint" id="donation-date-hint">
+          ระบุวัน/เดือน/ปี พ.ศ. เช่น 01/01/
+          {String(new Date().getFullYear() + 543).slice(-2)}
+        </p>
+        {error.date && (
+          <p className="field-error" id="donation-date-error" role="alert">
+            {error.date}
+          </p>
+        )}
+      </div>
+      <div className="form-control">
+        <label className="field-label" htmlFor="donation-name">
+          ชื่อ-นามสกุล<span className="required-mark" aria-hidden="true">*</span>
+        </label>
+        <input
+          id="donation-name"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          placeholder="ชื่อผู้บริจาค"
+          autoComplete="name"
+          className="field-input"
+          aria-invalid={Boolean(error.name)}
+          aria-describedby={error.name ? "donation-name-error" : undefined}
+        />
+        {error.name && (
+          <p className="field-error" id="donation-name-error" role="alert">
+            {error.name}
+          </p>
+        )}
+      </div>
+      <div className="form-control">
+        <label className="field-label" htmlFor="donation-amount">
+          จำนวนเงิน (บาท)
+          <span className="required-mark" aria-hidden="true">*</span>
+        </label>
+        <input
+          id="donation-amount"
+          type="number"
+          name="amount"
+          value={formData.amount}
+          onChange={handleChange}
+          placeholder="0.00"
+          min="0"
+          step="0.01"
+          inputMode="decimal"
+          className="field-input"
+          aria-invalid={Boolean(error.amount)}
+          aria-describedby={error.amount ? "donation-amount-error" : undefined}
+        />
+        {error.amount && (
+          <p className="field-error" id="donation-amount-error" role="alert">
+            {error.amount}
+          </p>
+        )}
+      </div>
+      <div className="form-control form-control--wide">
+        <label className="field-label" htmlFor="donation-project">
+          ประเภทบุญ<span className="required-mark" aria-hidden="true">*</span>
+        </label>
+        <select
+          id="donation-project"
+          name="project"
+          value={formData.project}
+          onChange={handleChange}
+          className="field-select"
+          aria-invalid={Boolean(error.project)}
+          aria-describedby={
+            error.project ? "donation-project-error" : undefined
+          }
+        >
+          <option value="">-- กรุณาเลือกประเภทบุญ --</option>
+          {donationTypes.map((type, index) => (
+            <option key={index} value={type}>
+              {type}
+            </option>
+          ))}
+          <option value="other">อื่นๆ ระบุ</option>
+        </select>
+        {error.project && (
+          <p className="field-error" id="donation-project-error" role="alert">
+            {error.project}
+          </p>
+        )}
+        {formData.project === "other" && (
+          <div className="mt-3">
+            <label className="field-label" htmlFor="custom-project">
+              ระบุประเภทบุญ
+            </label>
+            <input
+              id="custom-project"
+              type="text"
+              name="customProject"
+              placeholder="กรอกประเภทบุญ"
+              value={formData.customProject || ""}
+              onChange={handleChange}
+              className="field-input"
+            />
+          </div>
+        )}
+      </div>
     </div>
-
-    <div className="flex justify-center">
-      <button
-        type="submit"
-        className="bg-blue-500 text-white px-4 py-2 rounded "
-      >
-        Submit
+    <div className="form-actions">
+      <button type="submit" className="button-primary">
+        บันทึกข้อมูล
       </button>
     </div>
   </form>
