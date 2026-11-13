@@ -111,16 +111,21 @@ const CardComponent = React.forwardRef<HTMLDivElement, CardProps>(
 
             <span className="flex justify-end">
               <div className="flex flex-col items-center text-sm text-gray-600 pr-6">
-                <div className="relative h-20 w-52">
+                <div
+                  className="protected-card-images relative h-20 w-52"
+                  onContextMenu={(event) => event.preventDefault()}
+                >
                   <img
                     src="/assets/image/signature.png"
                     alt="ลายเซ็น"
                     className="absolute top-0 left-0 h-20 w-auto"
+                    draggable={false}
                   />
                   <img
                     src="/assets/image/remark.png"
                     alt="ตราประทับ"
                     className="absolute top-0 left-24 h-16 w-auto opacity-30"
+                    draggable={false}
                   />
                 </div>
 

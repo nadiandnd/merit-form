@@ -209,6 +209,13 @@
   width: 672px;
 }
 
+.protected-card-images,
+.protected-card-images img {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
 .donation-card-hint {
   display: none;
 }
